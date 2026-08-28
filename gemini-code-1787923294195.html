@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-It Planify - Content Management & Memory Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #FAF9F5;
+            --bg-card: #FFFFFF;
+            --sidebar-bg: #F4F3EE;
+            --border: #E8E6E1;
+            --text-dark: #1C1917;
+            --text-muted: #78716C;
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --accent-warm: #D97706;
+            --accent-light: #FFFBEB;
+            --danger: #EF4444;
+
+            --fmt-reel: #0F172A; --fmt-reel-txt: #FFFFFF;
+            --fmt-carosello: #334155; --fmt-carosello-txt: #FFFFFF;
+            --fmt-post: #64748B; --fmt-post-txt: #FFFFFF;
+
+            --plat-border: #E2E8F0;
+            --plat-txt: #475569;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-dark); height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+        h1, h2, h3, .brand, .fase-title, .user-name { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* LANDING PAGE / AUTH FULLSCREEN CONTAINER */
+        #auth-view {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; background: var(--bg-main); z-index: 1000; overflow-y: auto;
+        }
+
+        /* LATO SINISTRO: HERO & MISSION */
+        .landing-hero {
+            flex: 1.2; padding: 4rem 5rem; display: flex; flex-direction: column; justify-content: space-between;
+            background: linear-gradient(135deg, #FAF9F5 0%, #F3F0E6 100%);
+            border-right: 1px solid var(--border); overflow-y: auto;
+        }
+        .hero-brand { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+        .hero-brand span { color: var(--primary); }
+        
+        .hero-content { max-width: 580px; margin: 2rem 0; }
+        .hero-tagline { 
+            display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 1px; color: var(--primary); background: #EFF6FF; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.2rem; 
+        }
+        .hero-title { font-size: 2.5rem; font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 1.2rem; }
+        .hero-title span { color: var(--primary); }
+        .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; font-weight: 400; margin-bottom: 2rem; }
+
+        /* BOX IMPATTO SOCIALE E EVIDENZIATO */
+        .impact-card-highlight {
+            background: var(--accent-light); border: 2px solid var(--accent-warm); border-radius: 18px; padding: 1.6rem;
+            box-shadow: 0 8px 25px rgba(217, 119, 6, 0.12); position: relative; overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+        .impact-card-highlight:hover { transform: translateY(-2px); }
+        .impact-badge-glow { 
+            display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800; 
+            text-transform: uppercase; color: #B45309; background: #FEF3C7; padding: 4px 10px; border-radius: 12px;
+            letter-spacing: 0.5px; margin-bottom: 10px; 
+        }
+        .impact-title { font-size: 1.1rem; font-weight: 700; color: #78350F; margin-bottom: 8px; }
+        .impact-text { font-size: 0.85rem; color: #451A03; line-height: 1.55; font-weight: 400; }
+        .impact-text strong { font-weight: 600; }
+
+        /* LATO DESTRO: FORM REGISTRAZIONE */
+        .landing-auth-side {
+            flex: 0.8; padding: 4rem 3.5rem; display: flex; flex-direction: column; justify-content: center;
+            background: var(--bg-card); min-width: 420px; max-width: 520px; overflow-y: auto;
+        }
+        .auth-header { margin-bottom: 1.5rem; }
+        .auth-header h2 { font-size: 1.4rem; font-weight: 700; }
+        .auth-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+        .plan-box {
+            background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
+            padding: 0.9rem; margin-bottom: 1.2rem; text-align: center;
+        }
+        .plan-trial { font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .plan-price { font-size: 0.82rem; font-weight: 500; color: var(--text-dark); margin-top: 2px; }
+
+        .social-login-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0.5rem; }
+        .btn-social {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 0.65rem; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; font-size: 0.82rem; font-weight: 500; color: var(--text-dark);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-social:hover { background: #F8FAFC; border-color: #CBD5E1; }
+        
+        .consent-text { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-bottom: 1rem; line-height: 1.4; }
+
+        .divider {
+            display: flex; align-items: center; text-align: center; margin: 1rem 0;
+            color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .divider:not(:empty)::before { margin-right: .8em; }
+        .divider:not(:empty)::after { margin-left: .8em; }
+
+        .form-row { display: flex; gap: 10px; }
+        .form-group { margin-bottom: 0.9rem; flex: 1; }
+        .form-group label { display: block; font-size: 0.72rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; color: var(--text-muted); }
+        .form-input {
+            width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.85rem; outline: none; background: #FAFAFA; color: var(--text-dark); transition: border 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); background: #FFFFFF; }
+
+        .btn-primary {
+            width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none;
+            border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* APP LAYOUT INTEGRATA */
+        .app-layout { display: flex; height: 100vh; width: 100vw; }
+
+        .sidebar { 
+            width: 310px; background: var(--sidebar-bg); border-right: 1px solid var(--border); 
+            padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; overflow-y: auto;
+        }
+        .brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase; }
+        .brand span { color: var(--primary); }
+
+        .nav-tabs { display: flex; background: #E8E6E0; padding: 3px; border-radius: 10px; gap: 3px; }
+        .nav-tab {
+            flex: 1; padding: 7px; border: none; background: transparent; border-radius: 7px;
+            font-size: 0.75rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+        }
+        .nav-tab.active { background: white; color: var(--text-dark); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        .user-profile-bar {
+            background: var(--bg-card); padding: 0.75rem 0.9rem; border-radius: 12px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border 0.2s;
+        }
+        .user-profile-bar:hover { border-color: #CBD5E1; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-size: 0.85rem; font-weight: 600; }
+        .user-status { font-size: 0.68rem; color: #16A34A; font-weight: 500; }
+
+        .page-group { margin-bottom: 1.2rem; }
+        .page-title { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.8rem; }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; padding: 2.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
+        .project-heading h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+        .project-heading p { color: var(--text-muted); font-size: 0.82rem; margin-top: 3px; font-weight: 400; }
+
+        .controls-group { display: flex; gap: 10px; align-items: center; }
+        .select-custom {
+            background: var(--bg-card); border: 1px solid var(--border); padding: 0.5rem 0.85rem;
+            border-radius: 10px; font-size: 0.82rem; font-weight: 500; color: var(--text-dark); outline: none; cursor: pointer;
+        }
+
+        .social-dropdown { position: relative; }
+        .social-btn {
+            background: var(--bg-card); border: 1px solid var(--border); padding: 0.5rem 0.85rem;
+            border-radius: 10px; font-weight: 500; cursor: pointer; font-size: 0.82rem; color: var(--text-dark);
+        }
+        .social-menu {
+            display: none; position: absolute; right: 0; top: 42px; background: white;
+            border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06); width: 180px; z-index: 100;
+        }
+        .social-menu.open { display: block; }
+        .social-option { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; padding: 5px 0; cursor: pointer; }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* WORKFLOW BLOCCHI */
+        .fasi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; }
+        .fase-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; min-height: 280px;
+        }
+        .fase-num { font-size: 0.68rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .fase-title { font-size: 0.9rem; font-weight: 600; }
+
+        .status-select {
+            border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 600; cursor: pointer; outline: none; width: 100%;
+        }
+        .status-todo { background: #F1F5F9; color: #475569; }
+        .status-doing { background: #FEF3C7; color: #D97706; }
+        .status-done { background: #DCFCE7; color: #16A34A; }
+        .status-blocked { background: #FEE2E2; color: #DC2626; }
+
+        textarea.editor-idea {
+            width: 100%; flex: 1; border: 1px solid var(--border); background: var(--bg-main);
+            border-radius: 10px; padding: 0.75rem; font-size: 0.82rem; resize: none; outline: none;
+            color: var(--text-dark); line-height: 1.5; font-weight: 400;
+        }
+
+        .platform-link {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.6rem; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-dark); font-size: 0.75rem; font-weight: 500;
+        }
+
+        /* CALENDARIO DRAG & DROP */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .cal-day-header { text-align: center; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); padding-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .cal-day-cell {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            min-height: 135px; padding: 8px; display: flex; flex-direction: column; gap: 6px;
+            transition: background 0.2s;
+        }
+        .cal-day-cell.drag-over { background: #EFF6FF; border-color: var(--primary); }
+        .cal-date { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+        
+        .cal-event {
+            background: var(--sidebar-bg); border: 1px solid var(--border); border-radius: 8px; 
+            padding: 6px 8px; font-size: 0.72rem; cursor: grab; user-select: none;
+        }
+        .cal-event-title { font-weight: 600; display: block; margin-bottom: 2px; color: var(--text-dark); }
+        .cal-event-meta { font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
+
+        /* PROFILO UTENTE */
+        .profile-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 1.5rem; max-width: 580px; margin-bottom: 1.5rem;
+        }
+        .profile-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.4px; }
+        
+        .pages-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .page-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.65rem 0.85rem; background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.82rem; font-weight: 500;
+        }
+        .btn-danger {
+            background: transparent; color: var(--danger); border: 1px solid var(--danger);
+            padding: 0.45rem 0.85rem; border-radius: 8px; font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-danger:hover { background: var(--danger); color: white; }
+
+        @media (max-width: 900px) {
+            #auth-view { flex-direction: column; overflow-y: auto; }
+            .landing-hero, .landing-auth-side { flex: none; width: 100%; max-width: 100%; min-width: 100%; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-view">
+        
+        <div class="landing-hero">
+            <div class="hero-brand">Post-It <span>Planify</span></div>
+
+            <div class="hero-content">
+                <span class="hero-tagline">Soluzione Organizzativa per Creator & SMM</span>
+                <h1 class="hero-title">Pianifica senza dimenticare. <span>Dall'idea alla pubblicazione.</span></h1>
+                <p class="hero-desc">Un workspace visivo progettato per semplificare il flusso di lavoro di chi crea contenuti ogni giorno, eliminando la confusione e mantenendo organizzate le scadenze editoriali.</p>
+
+                <div class="impact-card-highlight">
+                    <div class="impact-badge-glow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        Il valore del promemoria
+                    </div>
+                    <div class="impact-title">Perché ci chiamiamo "Post-It"?</div>
+                    <div class="impact-text">
+                        Un Post-it è il simbolo universale del <strong>non voler dimenticare</strong>. Così come la nostra app aiuta i professionisti digitali a non perdere mai il filo delle proprie idee, crediamo che il diritto di preservare i propri ricordi appartenga a tutti.<br><br>
+                        Per questo sosteniamo con una quota dei ricavi i laboratori di arte e cultura destinati alla stimolazione cognitiva e ai centri scientifici di ricerca contro la demenza senile.
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                © 2026 Post-It Planify. Tutti i diritti riservati.
+            </div>
+        </div>
+
+        <div class="landing-auth-side">
+            <div class="auth-header">
+                <h2>Crea il tuo account</h2>
+                <p>Inizia a pianificare i tuoi contenuti oggi stesso</p>
+            </div>
+
+            <div class="plan-box">
+                <div class="plan-trial">Prova Gratuita di 7 Giorni</div>
+                <div class="plan-price">Poi €5/mese o €40/anno (Annullabile in qualsiasi momento)</div>
+            </div>
+
+            <div class="social-login-group">
+                <button class="btn-social" onclick="handleSocialRegister('Google')">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                    Continua con Google
+                </button>
+                <button class="btn-social" onclick="handleSocialRegister('Outlook')">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#00A4EF" d="M1 1h10v10H1z"/><path fill="#7FBA00" d="M13 1h10v10H1z"/><path fill="#FFB900" d="M1 13h10v10H1z"/><path fill="#F25022" d="M13 13h10v10H1z"/></svg>
+                    Continua con Outlook
+                </button>
+                <button class="btn-social" onclick="handleSocialRegister('Facebook')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Continua con Facebook
+                </button>
+            </div>
+            
+            <p class="consent-text">Proseguendo accetti il trattamento dei dati ai fini del servizio.</p>
+
+            <div class="divider">oppure inserisci i tuoi dati</div>
+
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="reg-firstname" class="form-input" placeholder="Marco" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cognome</label>
+                        <input type="text" id="reg-lastname" class="form-input" placeholder="Rossi" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" class="form-input" placeholder="nome@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-pass" class="form-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Attiva 7 Giorni Gratis</button>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="app-layout">
+        
+        <div class="sidebar">
+            <div class="brand">Post-It <span>Planify</span></div>
+            
+            <div class="user-profile-bar" onclick="switchView('profile', document.getElementById('tab-profile'))">
+                <div class="user-info">
+                    <span class="user-name" id="display-user-name">Utente</span>
+                    <span class="user-status" id="sub-status">Trial (7 gg rimasti)</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Profilo ⚙</span>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchView('planner', this)">Workflow</button>
+                <button class="nav-tab" onclick="switchView('calendar', this)">Calendario</button>
+                <button class="nav-tab" id="tab-profile" onclick="switchView('profile', this)">Profilo</button>
+            </div>
+
+            <div id="sidebar-pages-container">
+                <div class="page-group">
+                    <div class="page-title" id="sidebar-page-title">Pagine collegate</div>
+                    <p id="no-pages-msg" style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Nessuna pagina registrata. Aggiungila dalla sezione Profilo.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            
+            <div class="top-bar">
+                <div class="project-heading">
+                    <h1 id="main-project-title">Reel Nuovi Piatti Estivi</h1>
+                    <p id="main-project-sub">Seleziona o crea un nuovo progetto</p>
+                </div>
+
+                <div class="controls-group">
+                    <select class="select-custom">
+                        <option selected>Format: Reel / Video</option>
+                        <option>Format: Carosello</option>
+                        <option>Format: Post Singolo</option>
+                        <option>Format: Storie</option>
+                    </select>
+
+                    <div class="social-dropdown">
+                        <button class="social-btn" onclick="toggleMenu()">Social Target ▾</button>
+                        <div class="social-menu" id="social-menu">
+                            <label class="social-option"><input type="checkbox" checked> Instagram</label>
+                            <label class="social-option"><input type="checkbox" checked> TikTok</label>
+                            <label class="social-option"><input type="checkbox"> Meta / Facebook</label>
+                            <label class="social-option"><input type="checkbox"> LinkedIn</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="planner-view" class="view-section active">
+                <div class="fasi-grid">
+                    <div class="fase-card">
+                        <div>
+                            <div class="fase-num">Fase 1</div>
+                            <div class="fase-title">Idea & Copy</div>
+                        </div>
+                        <select class="status-select status-done" onchange="updateStatusColor(this)">
+                            <option value="done" selected>Completato</option>
+                            <option value="doing">In corso</option>
+                            <option value="todo">Da fare</option>
+                            <option value="blocked">Bloccato</option>
+                        </select>
+                        <textarea class="editor-idea" placeholder="Inserisci script, copy o concetti..."></textarea>
+                    </div>
+
+                    <div class="fase-card">
+                        <div>
+                            <div class="fase-num">Fase 2</div>
+                            <div class="fase-title">Registrazione</div>
+                        </div>
+                        <select class="status-select status-doing" onchange="updateStatusColor(this)">
+                            <option value="doing" selected>In corso</option>
+                            <option value="todo">Da fare</option>
+                            <option value="done">Completato</option>
+                            <option value="blocked">Bloccato</option>
+                        </select>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Riprese dei contenuti.</p>
+                    </div>
+
+                    <div class="fase-card">
+                        <div>
+                            <div class="fase-num">Fase 3</div>
+                            <div class="fase-title">Montaggio</div>
+                        </div>
+                        <select class="status-select status-todo" onchange="updateStatusColor(this)">
+                            <option value="todo" selected>Da fare</option>
+                            <option value="doing">In corso</option>
+                            <option value="done">Completato</option>
+                            <option value="blocked">Bloccato</option>
+                        </select>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Montaggio ritmo dinamico e sottotitoli.</p>
+                    </div>
+
+                    <div class="fase-card">
+                        <div>
+                            <div class="fase-num">Fase 4</div>
+                            <div class="fase-title">Programmazione</div>
+                        </div>
+                        <select class="status-select status-todo" onchange="updateStatusColor(this)">
+                            <option value="todo" selected>Da fare</option>
+                            <option value="doing">In corso</option>
+                            <option value="done">Completato</option>
+                            <option value="blocked">Bloccato</option>
+                        </select>
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 5px;">
+                            <a href="https://www.instagram.com/create/select/" target="_blank" class="platform-link">Instagram Web ↗ <input type="checkbox"></a>
+                            <a href="https://business.facebook.com/" target="_blank" class="platform-link">Meta Business ↗ <input type="checkbox"></a>
+                            <a href="https://www.tiktok.com/creator-center/upload" target="_blank" class="platform-link">TikTok Upload ↗ <input type="checkbox"></a>
+                            <a href="https://www.linkedin.com/" target="_blank" class="platform-link">LinkedIn ↗ <input type="checkbox"></a>
+                        </div>
+                    </div>
+
+                    <div class="fase-card">
+                        <div>
+                            <div class="fase-num">Fase 5</div>
+                            <div class="fase-title">Pubblicato</div>
+                        </div>
+                        <select class="status-select status-todo" onchange="updateStatusColor(this)">
+                            <option value="todo" selected>Da fare</option>
+                            <option value="doing">In corso</option>
+                            <option value="done">Completato</option>
+                            <option value="blocked">Bloccato</option>
+                        </select>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Verifica pubblicazione e analisi metriche.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="calendar-view" class="view-section">
+                <h2 style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem;">Programmazione Contenuti (Trascina per spostare)</h2>
+                <div class="calendar-grid">
+                    <div class="cal-day-header">LUN</div>
+                    <div class="cal-day-header">MAR</div>
+                    <div class="cal-day-header">MER</div>
+                    <div class="cal-day-header">GIO</div>
+                    <div class="cal-day-header">VEN</div>
+                    <div class="cal-day-header">SAB</div>
+                    <div class="cal-day-header">DOM</div>
+
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">1</span></div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)">
+                        <span class="cal-date">2</span>
+                        <div class="cal-event" draggable="true" ondragstart="drag(event)" id="ev-1">
+                            <span class="cal-event-title">Reel Nuovi Piatti</span>
+                            <span class="cal-event-meta">18:00</span>
+                        </div>
+                    </div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">3</span></div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">4</span></div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">5</span></div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">6</span></div>
+                    <div class="cal-day-cell" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="drop(event)"><span class="cal-date">7</span></div>
+                </div>
+            </div>
+
+            <div id="profile-view" class="view-section">
+                <div class="profile-card">
+                    <h3>Dati Personali</h3>
+                    <div class="form-group">
+                        <label>Nome e Cognome</label>
+                        <input type="text" id="prof-name" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Account</label>
+                        <input type="email" id="prof-email" class="form-input" readonly>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3>Abbonamento & Piano</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.2rem; font-weight: 400;">
+                        Stato Attuale: <strong id="prof-plan-status" style="color: #16A34A; font-weight: 600;">Prova Gratuita Attiva (7 Giorni)</strong>
+                    </p>
+                    <button class="btn-danger" onclick="cancelSubscription()">Annulla Abbonamento</button>
+                </div>
+
+                <div class="profile-card">
+                    <h3>Registra Pagine / Brand Gestiti</h3>
+                    <div class="form-group" style="display: flex; gap: 8px;">
+                        <input type="text" id="new-page-input" class="form-input" placeholder="Es. Ristorante La Torre...">
+                        <button class="btn-primary" style="width: auto; padding: 0.65rem 1rem;" onclick="addNewPage()">Aggiungi</button>
+                    </div>
+                    <div class="pages-list" id="pages-list-container"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let userData = {
+            name: '',
+            email: '',
+            pages: [],
+            subActive: true
+        };
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const fn = document.getElementById('reg-firstname').value;
+            const ln = document.getElementById('reg-lastname').value;
+            userData.name = `${fn} ${ln}`;
+            userData.email = document.getElementById('reg-email').value;
+            completeAuth();
+        }
+
+        function handleSocialRegister(provider) {
+            userData.name = `Utente ${provider}`;
+            userData.email = `user.${provider.toLowerCase()}@example.com`;
+            completeAuth();
+        }
+
+        function completeAuth() {
+            document.getElementById('display-user-name').innerText = userData.name;
+            document.getElementById('prof-name').value = userData.name;
+            document.getElementById('prof-email').value = userData.email;
+
+            renderPages();
+            document.getElementById('auth-view').style.display = 'none';
+        }
+
+        function renderPages() {
+            const container = document.getElementById('pages-list-container');
+            const noPagesMsg = document.getElementById('no-pages-msg');
+            const sidebarTitle = document.getElementById('sidebar-page-title');
+            const mainSub = document.getElementById('main-project-sub');
+            
+            container.innerHTML = '';
+            
+            if(userData.pages.length === 0) {
+                if(noPagesMsg) noPagesMsg.style.display = 'block';
+                sidebarTitle.innerText = 'Pagine collegate';
+                mainSub.innerText = 'Nessuna pagina collegata';
+            } else {
+                if(noPagesMsg) noPagesMsg.style.display = 'none';
+                sidebarTitle.innerText = `Pagina: ${userData.pages[0]}`;
+                mainSub.innerText = `Pagina attiva: ${userData.pages[0]}`;
+
+                userData.pages.forEach((page) => {
+                    const item = document.createElement('div');
+                    item.className = 'page-item';
+                    item.innerHTML = `<span>${page}</span> <span style="font-size: 0.72rem; color: #16A34A; font-weight: 500;">Attiva</span>`;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function addNewPage() {
+            const input = document.getElementById('new-page-input');
+            if(input.value.trim() !== '') {
+                userData.pages.push(input.value.trim());
+                renderPages();
+                input.value = '';
+            }
+        }
+
+        function cancelSubscription() {
+            if(confirm('Sei sicuro di voler annullare l\'abbonamento? Mantieni l\'accesso per i 7 giorni di prova.')) {
+                userData.subActive = false;
+                document.getElementById('sub-status').innerText = 'Abbonamento Annullato';
+                document.getElementById('sub-status').style.color = 'var(--danger)';
+                document.getElementById('prof-plan-status').innerText = 'Disattivato (Nessun addebito futuro)';
+                document.getElementById('prof-plan-status').style.color = 'var(--danger)';
+                alert('Abbonamento annullato con successo.');
+            }
+        }
+
+        function toggleMenu() { document.getElementById('social-menu').classList.toggle('open'); }
+
+        function updateStatusColor(selectElement) {
+            selectElement.className = 'status-select';
+            const val = selectElement.value;
+            selectElement.classList.add('status-' + val);
+        }
+
+        function switchView(viewName, btn) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(viewName + '-view').classList.add('active');
+        }
+
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+        function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+        function clearDrag(ev) { ev.currentTarget.classList.remove('drag-over'); }
+        function drop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            var data = ev.dataTransfer.getData("text");
+            ev.currentTarget.appendChild(document.getElementById(data));
+        }
+    </script>
+</body>
+</html>
